@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Hewan - Game Seru!</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3f5a3212-955f-46fa-b499-24440b5365e0.png') center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        h1 {
+            color: #2c7873;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: #6fb98f;
+            bottom: -10px;
+            left: 25%;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        
+        .hint-container {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: rgba(111, 185, 143, 0.2);
+            border-radius: 10px;
+            border-left: 5px solid #6fb98f;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .hint {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .word-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .input-container {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        input[type="text"] {
+            width: 80%;
+            padding: 15px;
+            border: 2px solid #6fb98f;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 20px 0;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #2c7873;
+            box-shadow: 0 0 10px rgba(44, 120, 115, 0.3);
+        }
+        
+        button {
+            background-color: #6fb98f;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background-color: #2c7873;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .lives {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .life {
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .life.lost {
+            background-color: #ccc;
+            transform: scale(0.8);
+        }
+        
+        .feedback {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .correct {
+            color: green;
+        }
+        
+        .wrong {
+            color: red;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s;
+        }
+        
+        .game-over.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .game-over h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-message {
+            margin: 20px 0;
+            font-size: 1.5rem;
+            color: #2c7873;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            input[type="text"] {
+                width: 90%;
+            }
+            
+            .character img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tebak Hewan</h1>
+        <div class="game-stats">
+            <div class="score">Skor: <span id="score">0</span></div>
+            <div class="level">Level: <span id="level">1</span></div>
+        </div>
+        
+        <div class="welcome-message">Enjoy the Game!</div>
+        
+        <div class="hint-container">
+            <div class="word-info">
+                Kata <span id="word-length">5</span> huruf
+            </div>
+            <div class="hint" id="hint">Petunjuk akan muncul di sini</div>
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="input-container">
+            <input type="text" id="guess-input" placeholder="Masukkan tebakanmu..." autocomplete="off">
+        </div>
+        
+        <div class="lives" id="lives">
+            <div class="life"></div>
+            <div class="life"></div>
+            <div class="life"></div>
+        </div>
+        
+        <button id="submit-btn">Submit</button>
+        <button id="shuffle-btn">Acak Soal</button>
+        
+        <div class="game-over" id="game-over">
+            <h2 id="game-over-message">Game Over!</h2>
+            <p id="game-over-score">Skor kamu: 0</p>
+            <button id="restart-btn">Main Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // Data game - hewan dan petunjuk
+        const gameData = [
+            { word: "harimau", hint: "Kucing besar dengan loreng oranye dan hitam" },
+            { word: "gajah", hint: "Hewan besar berbelalai dan bergading" },
+            { word: "monyet", hint: "Primata yang suka memanjat pohon" },
+            { word: "burung", hint: "Hewan bersayap yang bisa terbang" },
+            { word: "ular", hint: "Reptil tidak berkaki yang melata" },
+            { word: "kucing", hint: "Hewan peliharaan yang suka mengeong" },
+            { word: "anjing", hint: "Sahabat manusia yang setia" },
+            { word: "kelinci", hint: "Hewan kecil berbulu dengan telinga panjang" },
+            { word: "kuda", hint: "Hewan yang biasa ditunggangi" },
+            { word: "sapi", hint: "Hewan ternak penghasil susu" },
+            { word: "kambing", hint: "Hewan berkaki empat yang suka memakan rumput" },
+            { word: "ayam", hint: "Unggas yang biasa diternak untuk daging dan telur" },
+            { word: "bebek", hint: "Unggas air yang berenang di kolam" },
+            { word: "singa", hint: "Raja hutan yang berambut lebat di leher" },
+            { word: "jerapah", hint: "Hewan tertinggi dengan leher panjang" }
+        ];
+        
+        // Variabel game
+        let currentWord = '';
+        let currentHint = '';
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let usedWords = [];
+        
+        // Elemen DOM
+        const hintElement = document.getElementById('hint');
+        const wordLengthElement = document.getElementById('word-length');
+        const feedbackElement = document.getElementById('feedback');
+        const guessInput = document.getElementById('guess-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const livesElement = document.getElementById('lives');
+        const gameOverElement = document.getElementById('game-over');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartBtn = document.getElementById('restart-btn');
+        const characterImg = document.getElementById('character-img');
+        
+        // Inisialisasi game
+        function initGame() {
+            // Reset variabel game
+            score = 0;
+            level = 1;
+            lives = 3;
+            usedWords = [];
+            
+            // Update tampilan
+            updateScore();
+            updateLives();
+            
+            // Mulai level baru
+            startNewLevel();
+            
+            // Sembunyikan game over
+            gameOverElement.classList.remove('show');
+        }
+        
+        // Mulai level baru
+        function startNewLevel() {
+            // Pilih kata acak yang belum digunakan
+            if (usedWords.length === gameData.length) {
+                usedWords = []; // Reset jika semua kata sudah digunakan
+            }
+            
+            let availableWords = gameData.filter(wordObj => !usedWords.includes(wordObj.word));
+            let randomIndex = Math.floor(Math.random() * availableWords.length);
+            let selectedWordObj = availableWords[randomIndex];
+            
+            currentWord = selectedWordObj.word.toLowerCase();
+            currentHint = selectedWordObj.hint;
+            usedWords.push(currentWord);
+            
+            // Update tampilan
+            hintElement.textContent = currentHint;
+            wordLengthElement.textContent = currentWord.length;
+            guessInput.value = '';
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            
+            // Empty (image removed)
+            
+            // Fokus ke input
+            guessInput.focus();
+        }
+        
+        // Handle submit tebakan
+        function handleSubmit() {
+            const guess = guessInput.value.trim().toLowerCase();
+            
+            if (guess === '') {
+                showFeedback('Masukkan tebakan dulu ya!', 'wrong');
+                return;
+            }
+            
+            if (guess === currentWord) {
+                // Jawaban benar
+                score += level * 10;
+                showFeedback('Benar!', 'correct');
+                updateScore();
+                
+                // Level up setelah 3 kata benar
+                if (score % 30 === 0) {
+                    level++;
+                    levelElement.textContent = level;
+                }
+                
+                // Level baru setelah delay
+                setTimeout(startNewLevel, 1500);
+            } else {
+                // Jawaban salah
+                lives--;
+                updateLives();
+                
+                if (lives <= 0) {
+                    gameOver();
+                } else {
+                    showFeedback(`Salah! Coba lagi`, 'wrong');
+                    guessInput.value = '';
+                    guessInput.focus();
+                }
+            }
+        }
+        
+        // Tampilkan feedback
+        function showFeedback(message, type) {
+            feedbackElement.textContent = message;
+            feedbackElement.className = 'feedback ' + type;
+        }
+        
+        // Update skor
+        function updateScore() {
+            scoreElement.textContent = score;
+        }
+        
+        // Update nyawa
+        function updateLives() {
+            const lifeElements = livesElement.querySelectorAll('.life');
+            lifeElements.forEach((el, index) => {
+                if (index < lives) {
+                    el.classList.remove('lost');
+                } else {
+                    el.classList.add('lost');
+                }
+            });
+        }
+        
+        // Game over
+        function gameOver() {
+            gameOverMessage.textContent = 'Game Over!';
+            gameOverScore.textContent = `Skor kamu: ${score}`;
+            gameOverElement.classList.add('show');
+            
+            // Empty (image removed)
+        }
+        
+        // Acak soal baru
+        function shuffleQuestion() {
+            // Pilih kata acak baru (boleh sama dengan sebelumnya)
+            let randomIndex = Math.floor(Math.random() * gameData.length);
+            let selectedWordObj = gameData[randomIndex];
+            
+            currentWord = selectedWordObj.word.toLowerCase();
+            currentHint = selectedWordObj.hint;
+            
+            // Update tampilan
+            hintElement.textContent = currentHint;
+            wordLengthElement.textContent = currentWord.length;
+            guessInput.value = '';
+            feedbackElement.textContent = '';
+            
+            showFeedback('Soal diacak!', 'correct');
+        }
+        
+        // Event listeners
+        submitBtn.addEventListener('click', handleSubmit);
+        document.getElementById('shuffle-btn').addEventListener('click', shuffleQuestion);
+        restartBtn.addEventListener('click', initGame);
+        
+        // Handle enter key
+        guessInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+        
+        // Mulai game
+        initGame();
+    </script>
+</body>
+</html>
